@@ -1,0 +1,19 @@
+=head1 NAME
+
+pwm	- Manage user files for basic authentication
+
+=head1 SYNOPSIS
+
+pwm pwfile {add|del|pass} user
+
+=head1 DESCRIPTION
+
+pwm is used to create and update the flat-files used to store
+usernames name and pasword hash for authentication of users.
+
+=head1 SEE ALSO
+
+L<htpasswd(1)>, L<crypt(3)>
+
+=cut
+

@@ -127,7 +127,7 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(sbindir)"
+am__installdirs = "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(man8dir)"
 SCRIPTS = $(sbin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -150,6 +150,9 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+man8dir = $(mandir)/man8
+NROFF = nroff
+MANS = $(man8_MANS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/pwm.pl config.guess \
 	config.sub install-sh missing
@@ -263,6 +266,7 @@ EXTRA_DIST = \
 	LICENSE
 
 sbin_SCRIPTS = pwm
+man8_MANS = pwm.man
 all: all-am
 
 .SUFFIXES:
@@ -336,6 +340,47 @@ uninstall-sbinSCRIPTS:
 	files=`for p in $$list; do echo "$$p"; done | \
 	       sed -e 's,.*/,,;$(transform)'`; \
 	dir='$(DESTDIR)$(sbindir)'; $(am__uninstall_files_from_dir)
+install-man8: $(man8_MANS)
+	@$(NORMAL_INSTALL)
+	@list1='$(man8_MANS)'; \
+	list2=''; \
+	test -n "$(man8dir)" \
+	  && test -n "`echo $$list1$$list2`" \
+	  || exit 0; \
+	echo " $(MKDIR_P) '$(DESTDIR)$(man8dir)'"; \
+	$(MKDIR_P) "$(DESTDIR)$(man8dir)" || exit 1; \
+	{ for i in $$list1; do echo "$$i"; done;  \
+	if test -n "$$list2"; then \
+	  for i in $$list2; do echo "$$i"; done \
+	    | sed -n '/\.8[a-z]*$$/p'; \
+	fi; \
+	} | while read p; do \
+	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; echo "$$p"; \
+	done | \
+	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
+	sed 'N;N;s,\n, ,g' | { \
+	list=; while read file base inst; do \
+	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
+	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man8dir)/$$inst'"; \
+	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man8dir)/$$inst" || exit $$?; \
+	  fi; \
+	done; \
+	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
+	while read files; do \
+	  test -z "$$files" || { \
+	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man8dir)'"; \
+	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man8dir)" || exit $$?; }; \
+	done; }
+
+uninstall-man8:
+	@$(NORMAL_UNINSTALL)
+	@list='$(man8_MANS)'; test -n "$(man8dir)" || exit 0; \
+	files=`{ for i in $$list; do echo "$$i"; done; \
+	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
+	dir='$(DESTDIR)$(man8dir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -508,9 +553,9 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile $(SCRIPTS)
+all-am: Makefile $(SCRIPTS) $(MANS)
 installdirs:
-	for dir in "$(DESTDIR)$(sbindir)"; do \
+	for dir in "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(man8dir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -564,7 +609,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-man
 
 install-dvi: install-dvi-am
 
@@ -580,7 +625,7 @@ install-info: install-info-am
 
 install-info-am:
 
-install-man:
+install-man: install-man8
 
 install-pdf: install-pdf-am
 
@@ -610,7 +655,9 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-sbinSCRIPTS
+uninstall-am: uninstall-man uninstall-sbinSCRIPTS
+
+uninstall-man: uninstall-man8
 
 .MAKE: install-am install-strip
 
@@ -622,11 +669,12 @@ uninstall-am: uninstall-sbinSCRIPTS
 	install install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-sbinSCRIPTS install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags-am \
-	uninstall uninstall-am uninstall-sbinSCRIPTS
+	install-man8 install-pdf install-pdf-am install-ps \
+	install-ps-am install-sbinSCRIPTS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags-am uninstall uninstall-am uninstall-man \
+	uninstall-man8 uninstall-sbinSCRIPTS
 
 .PRECIOUS: Makefile
 

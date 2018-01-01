@@ -8,4 +8,6 @@ EXTRA_DIST = \
 
 sbin_SCRIPTS = pwm
 
+man8_MANS = pwm.man
+
 #EOF
