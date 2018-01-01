@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!@perl@
 
 package aAuth;
 
@@ -328,8 +328,4 @@ if ($oper =~ /^add/) {
     help;
     exit 1;
 }
-
-
-
-
 #EOF
