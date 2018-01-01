@@ -311,8 +311,27 @@ if ($oper =~ /^add/) {
     }
 
 } elsif ($oper =~ /^pass/) {
-    print 'New password:'; my $password1 = <STDIN>; chomp $password1;
-    print 'Again:'; my $password2 = <STDIN>; chomp $password2;
+
+    unless (-r $file) {
+        print "Password file not exist\n";
+        exit 1;
+    }
+    unless ($a->profile($name)) {
+        print "User not exist\n";
+        exit 1;
+    }
+
+    print 'New password:'; 
+    system "stty -echo";
+    my $password1 = <STDIN>;
+    system "stty echo";
+    chomp $password1;
+    print "\nAgain:";
+    system "stty -echo";
+    my $password2 = <STDIN>;
+    system "stty echo";
+    chomp $password2;
+    print "\n";
 
     if ($password1 ne $password2) {
         print "Password mismatch\n";
