@@ -47,7 +47,9 @@ sub list {
 sub profile {
     my ($self, $name) = @_;
     return undef unless $name;
-    $self->list->{$name};
+    my $list = $self->list;
+    return undef unless $list;
+    $list->{$name};
 }
 
 sub check {
